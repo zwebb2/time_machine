@@ -1,0 +1,7 @@
+pandas
+cryptography
+opcua
+easygui
+numpy
+pandas
+openpyxl
