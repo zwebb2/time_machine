@@ -23,13 +23,15 @@ class TimeMachine:
         self.dataframe = None
         self.opc_var_names = None
         self.opc_vars = None
+        self.verbose = False
 
         self.opc_configured_flag = False
         self.opc_run_flag = False
 
     def select_data(self):
         """Choose a dataset to run in the machine"""
-        path = Path(easygui.fileopenbox())
+        path = Path(easygui.fileopenbox(title = "Select a data file to run...", 
+                                        filetypes=["*.csv", ["*.xls", "*.xlsx", "Excel files"]]))
         self.data_path = path
         raw_dataframe = self._load_data(path)
         regex = re.compile('^(?!.*time).*', flags = re.IGNORECASE)
@@ -47,13 +49,10 @@ class TimeMachine:
 
         raise ValueError
 
-    def configure(self, interval_seconds: int):
+    def configure(self, interval_seconds: int, verbose: bool):
         """Choose parameters for this time machine"""
         self.interval_seconds = interval_seconds
-
-    def run(self):
-        """Start running the time machine"""
-        # some sort of while loop?
+        self.verbose = verbose
 
     def create_opc_server(self, ip_address = "96.125.117.229:4841"):
         """Creates the OPC server with opcua python"""
@@ -112,7 +111,10 @@ class TimeMachine:
         end = self.dataframe.shape[0]
         row_number = 0
         while row_number < end:
-            self.update_opc(self.dataframe.iloc[row_number, :])
+            row_data = self.dataframe.iloc[row_number, :]
+            if self.verbose:
+                print(row_data)
+            self.update_opc(row_data)
             time.sleep(self.interval_seconds)
             row_number = row_number + 1
     
